@@ -27,3 +27,9 @@ docker run -it --rm \
 
 ##### Development
 
+To release a new version:
+
+```bash
+git tag 0.0.4
+make
+```
