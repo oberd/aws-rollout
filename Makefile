@@ -18,5 +18,6 @@ build_image: compile
 
 release: compile
 	@./release.sh
-	@docker push oberd/aws-rollout:latest
+	@docker push oberd/aws-rollout
+	@docker tag -f oberd/aws-rollout oberd/aws-rollout:$$(git describe --tags `git rev-list --tags --max-count=1`)
 	@docker push oberd/aws-rollout:$$(git describe --tags `git rev-list --tags --max-count=1`)
