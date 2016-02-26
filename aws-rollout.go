@@ -82,13 +82,20 @@ func setImage(svc *ecs.ECS, taskArn string, image string) (string, error) {
         return "", err
     }
     task := resp.TaskDefinition
-    task.ContainerDefinitions[0].Image = &image
-    regResp, err := svc.RegisterTaskDefinition(&ecs.RegisterTaskDefinitionInput{
-        Family: task.Family,
-        ContainerDefinitions: task.ContainerDefinitions,
-        Volumes: task.Volumes,
-    })
-    return *regResp.TaskDefinition.TaskDefinitionArn, nil
+    var out string = taskArn
+    if *task.ContainerDefinitions[0].Image != image {
+        task.ContainerDefinitions[0].Image = &image
+        regResp, err := svc.RegisterTaskDefinition(&ecs.RegisterTaskDefinitionInput{
+            Family: task.Family,
+            ContainerDefinitions: task.ContainerDefinitions,
+            Volumes: task.Volumes,
+        })
+        if err != nil {
+            return "", err
+        }
+        out = *regResp.TaskDefinition.TaskDefinitionArn
+    }
+    return out, nil
 }
 
 func main() {
@@ -104,6 +111,10 @@ func main() {
 
     var service string = flag.Arg(0)
     var image string = flag.Arg(1)
+
+    fmt.Printf("Cluster: %s\n", *cluster)
+    fmt.Printf("Service: %s\n", service)
+    fmt.Printf("Image: %s\n", image)
 
     svc := ecs.New(session.New())
 
@@ -129,5 +140,5 @@ func main() {
         fmt.Println(err.Error())
         return
     }
-    fmt.Printf("Deployed %s %d", newTaskArn, *serv.Service.PendingCount)
+    fmt.Printf("Deployed %s", newTaskArn, *serv.Service.PendingCount)
 }
