@@ -131,7 +131,15 @@ func main() {
 		return
 	}
 	taskArn, err := findTaskArn(svc, clusterArn, serviceArn)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	newTaskArn, err := setImage(svc, taskArn, image)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	params := &ecs.UpdateServiceInput{
 		Service:        aws.String(serviceArn),
 		Cluster:        aws.String(clusterArn),
@@ -142,5 +150,6 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Printf("Deployed %s, Pending: %d", newTaskArn, *serv.Service.PendingCount)
+	fmt.Printf("Deployed Task: %s", newTaskArn)
+	fmt.Printf("Pending Count: %d", *serv.Service.PendingCount)
 }
