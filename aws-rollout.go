@@ -35,6 +35,7 @@ func findServiceArn(svc *ecs.ECS, clusterArn string, serviceName string) (string
 	params := &ecs.ListServicesInput{
 		Cluster: aws.String(clusterArn),
 	}
+	params.SetMaxResults(100)
 	services, err := svc.ListServices(params)
 	if err != nil {
 		return "", err
@@ -150,6 +151,7 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Printf("Deployed Task: %s", newTaskArn)
-	fmt.Printf("Pending Count: %d", *serv.Service.PendingCount)
+	fmt.Printf("Deployed Task: %s\n", newTaskArn)
+	fmt.Printf("Pending Count: %d\n", *serv.Service.PendingCount)
+	fmt.Println("Deployment Success!")
 }
