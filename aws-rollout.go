@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -10,6 +11,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	flag "github.com/ogier/pflag"
 )
+
+func failOnError(err error) {
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+}
 
 // findClusterArn finds a cluster's arn from a more human
 // readable name
@@ -122,35 +130,20 @@ func main() {
 	svc := ecs.New(session.New())
 
 	clusterArn, err := findClusterArn(svc, *cluster)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	failOnError(err)
 	serviceArn, err := findServiceArn(svc, clusterArn, service)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	failOnError(err)
 	taskArn, err := findTaskArn(svc, clusterArn, serviceArn)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	failOnError(err)
 	newTaskArn, err := setImage(svc, taskArn, image)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	failOnError(err)
 	params := &ecs.UpdateServiceInput{
 		Service:        aws.String(serviceArn),
 		Cluster:        aws.String(clusterArn),
 		TaskDefinition: aws.String(newTaskArn),
 	}
 	serv, err := svc.UpdateService(params)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	failOnError(err)
 	fmt.Printf("Deployed Task: %s\n", newTaskArn)
 	fmt.Printf("Pending Count: %d\n", *serv.Service.PendingCount)
 	fmt.Println("Deployment Success!")
