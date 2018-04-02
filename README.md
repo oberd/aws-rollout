@@ -30,6 +30,6 @@ docker run -it --rm \
 To release a new version:
 
 ```bash
-git tag 0.0.4
+git tag 0.2.0
 make
 ```
